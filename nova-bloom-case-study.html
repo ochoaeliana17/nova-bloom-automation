@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Bloom — Automation Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0d3d2b;
+    --green-mid:  #1a6645;
+    --green-main: #2d9c6a;
+    --green-soft: #c8ead8;
+    --green-pale: #eef7f2;
+    --ink:        #111a14;
+    --ink-mid:    #3d4d42;
+    --ink-light:  #7a8c80;
+    --cream:      #faf9f5;
+    --cream-dark: #f0ede4;
+    --white:      #ffffff;
+    --accent:     #d4702a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 18px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(250,249,245,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-dark);
+  }
+  .nav-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px; color: var(--green-dark);
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a {
+    font-size: 13px; font-weight: 500; color: var(--ink-light);
+    text-decoration: none; letter-spacing: .04em; text-transform: uppercase;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--green-main); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    padding-top: 72px;
+    overflow: hidden;
+  }
+  .hero-left {
+    padding: 80px 64px 80px 72px;
+    display: flex; flex-direction: column; justify-content: center;
+    position: relative; z-index: 2;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--green-main); margin-bottom: 32px;
+  }
+  .hero-tag::before {
+    content: ''; display: block;
+    width: 28px; height: 1px; background: var(--green-main);
+  }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 1.1; font-weight: 600;
+    color: var(--green-dark); margin-bottom: 12px;
+  }
+  .hero-title em { font-style: italic; color: var(--green-main); }
+  .hero-subtitle {
+    font-size: 18px; font-weight: 300; color: var(--ink-mid);
+    margin-bottom: 40px; max-width: 480px; line-height: 1.6;
+  }
+  .hero-meta {
+    display: flex; gap: 32px; flex-wrap: wrap;
+    padding-top: 32px; border-top: 1px solid var(--cream-dark);
+  }
+  .hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .hero-meta-label { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-light); }
+  .hero-meta-value { font-size: 14px; font-weight: 500; color: var(--ink); }
+
+  .hero-right {
+    background: var(--green-dark);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-pattern {
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle at 30% 40%, rgba(45,156,106,0.25) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(45,156,106,0.15) 0%, transparent 40%);
+  }
+  .hero-visual {
+    position: relative; z-index: 2;
+    padding: 48px;
+    width: 100%; max-width: 460px;
+  }
+  .flow-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px; padding: 20px 24px;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 16px;
+    animation: fadeSlideIn .6s ease both;
+  }
+  .flow-card:nth-child(1) { animation-delay: .1s; }
+  .flow-card:nth-child(2) { animation-delay: .25s; }
+  .flow-card:nth-child(3) { animation-delay: .4s; }
+  .flow-card:nth-child(4) { animation-delay: .55s; }
+  .flow-card:nth-child(5) { animation-delay: .7s; }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .flow-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(45,156,106,0.25); border: 1px solid var(--green-main);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .flow-card-body { flex: 1; }
+  .flow-card-title { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.9); }
+  .flow-card-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+  .flow-connector {
+    width: 1px; height: 12px; background: rgba(45,156,106,0.4);
+    margin: 0 0 0 35px;
+  }
+  .flow-badge {
+    font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 99px;
+    background: rgba(45,156,106,0.2); color: var(--green-soft);
+    border: 1px solid rgba(45,156,106,0.3);
+    white-space: nowrap;
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 100px 72px; }
+  section:nth-child(even) { background: var(--white); }
+
+  .section-tag {
+    font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--green-main); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-tag::after { content: ''; flex: 1; height: 1px; background: var(--green-soft); }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 3vw, 42px); font-weight: 600;
+    color: var(--green-dark); margin-bottom: 20px; line-height: 1.2;
+  }
+  .section-lead {
+    font-size: 17px; font-weight: 300; color: var(--ink-mid);
+    max-width: 640px; line-height: 1.7; margin-bottom: 56px;
+  }
+
+  /* ── COMPANY PROFILE ── */
+  .profile-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px;
+    background: var(--cream-dark); border-radius: 16px; overflow: hidden;
+    margin-bottom: 48px;
+  }
+  .profile-cell {
+    background: var(--cream); padding: 28px 32px;
+  }
+  .profile-cell-label { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-light); margin-bottom: 8px; }
+  .profile-cell-value { font-size: 22px; font-weight: 500; color: var(--green-dark); }
+  .profile-cell-sub { font-size: 13px; color: var(--ink-light); margin-top: 4px; }
+
+  .pain-list { display: flex; flex-direction: column; gap: 16px; }
+  .pain-item {
+    display: flex; gap: 20px; align-items: flex-start;
+    padding: 20px 24px; border-radius: 12px;
+    background: var(--cream); border: 1px solid var(--cream-dark);
+    transition: border-color .2s, transform .2s;
+  }
+  .pain-item:hover { border-color: var(--green-soft); transform: translateX(4px); }
+  .pain-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: #fef0e8; color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .pain-title { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .pain-desc { font-size: 13px; color: var(--ink-light); line-height: 1.6; }
+
+  /* ── DIAGNOSTIC ── */
+  .diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .diag-card {
+    border: 1px solid var(--cream-dark); border-radius: 16px; padding: 28px;
+    background: var(--cream);
+    transition: transform .2s, border-color .2s;
+    cursor: default;
+  }
+  .diag-card:hover { transform: translateY(-4px); border-color: var(--green-soft); }
+  .diag-card.highlight {
+    border-color: var(--green-main); background: var(--green-pale);
+    position: relative; overflow: hidden;
+  }
+  .diag-card.highlight::before {
+    content: 'Top priority';
+    position: absolute; top: 16px; right: 16px;
+    font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em;
+    background: var(--green-main); color: var(--white);
+    padding: 3px 10px; border-radius: 99px;
+  }
+  .diag-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px; color: var(--ink-light); margin-bottom: 12px;
+  }
+  .diag-title { font-size: 16px; font-weight: 500; color: var(--green-dark); margin-bottom: 8px; }
+  .diag-desc { font-size: 13px; color: var(--ink-mid); line-height: 1.6; margin-bottom: 16px; }
+  .diag-bars { display: flex; flex-direction: column; gap: 8px; }
+  .diag-bar-row { display: flex; align-items: center; gap: 10px; }
+  .diag-bar-label { font-size: 11px; color: var(--ink-light); width: 50px; flex-shrink: 0; }
+  .diag-bar-track {
+    flex: 1; height: 4px; background: var(--cream-dark); border-radius: 2px; overflow: hidden;
+  }
+  .diag-bar-fill { height: 100%; border-radius: 2px; background: var(--green-main); }
+
+  /* ── SOLUTION ── */
+  .email-tabs {
+    display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .etab {
+    padding: 8px 18px; border-radius: 8px; border: 1px solid var(--cream-dark);
+    background: var(--cream); font-size: 13px; font-weight: 500; color: var(--ink-mid);
+    cursor: pointer; transition: all .15s;
+  }
+  .etab.active {
+    background: var(--green-dark); color: var(--white); border-color: var(--green-dark);
+  }
+  .email-preview-wrap {
+    border: 1px solid var(--cream-dark); border-radius: 16px; overflow: hidden;
+    background: var(--white);
+  }
+  .ep-chrome {
+    background: var(--cream-dark); padding: 10px 16px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .ep-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .ep-meta {
+    padding: 14px 24px; border-bottom: 1px solid var(--cream-dark);
+    font-size: 12px; color: var(--ink-light); display: flex; flex-direction: column; gap: 3px;
+  }
+  .ep-meta b { color: var(--ink); font-weight: 500; }
+  .email-body-preview { padding: 0; }
+  .ep-header { background: var(--green-dark); padding: 24px 32px; }
+  .ep-logo { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--green-soft); }
+  .ep-tagline { font-size: 11px; color: rgba(200,234,216,0.6); margin-top: 3px; }
+  .ep-content { padding: 28px 32px; }
+  .ep-daybadge {
+    display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px;
+    border-radius: 99px; background: var(--green-pale); color: var(--green-mid);
+    border: 1px solid var(--green-soft); margin-bottom: 14px;
+  }
+  .ep-h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 12px; line-height: 1.3;
+  }
+  .ep-p { font-size: 14px; color: var(--ink-mid); line-height: 1.7; margin-bottom: 14px; }
+  .ep-cta {
+    display: inline-block; background: var(--green-main); color: var(--white);
+    font-size: 14px; font-weight: 500; padding: 11px 24px; border-radius: 8px;
+    margin-bottom: 20px; text-decoration: none;
+  }
+  .ep-divider { border: none; border-top: 1px solid var(--cream-dark); margin: 18px 0; }
+  .ep-note { font-size: 12px; color: var(--ink-light); line-height: 1.6; }
+  .ep-footer {
+    padding: 14px 32px; background: var(--cream); font-size: 11px; color: var(--ink-light);
+    border-top: 1px solid var(--cream-dark);
+  }
+  .tip-row-ep {
+    display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--cream-dark);
+  }
+  .tip-row-ep:last-child { border-bottom: none; }
+  .tip-ico { width: 30px; height: 30px; border-radius: 50%; background: var(--green-pale); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+  .tip-txt { font-size: 13px; color: var(--ink-mid); line-height: 1.6; }
+  .tip-txt b { color: var(--ink); font-weight: 500; }
+  .product-grid-ep { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+  .product-card-ep { background: var(--cream); border-radius: 10px; padding: 14px; }
+  .product-plant { font-size: 32px; text-align: center; margin-bottom: 8px; }
+  .product-name-ep { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .product-price-ep { font-size: 12px; color: var(--green-main); font-weight: 500; margin-top: 2px; }
+  .review-box {
+    background: var(--cream); border-radius: 10px; padding: 20px; text-align: center; margin: 14px 0;
+  }
+
+  /* ── TECH ── */
+  .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
+  .tech-card {
+    padding: 24px; border-radius: 12px;
+    background: var(--cream); border: 1px solid var(--cream-dark);
+  }
+  .tech-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-light); margin-bottom: 8px; }
+  .tech-card-value { font-size: 15px; font-weight: 500; color: var(--green-dark); margin-bottom: 4px; }
+  .tech-card-note { font-size: 12px; color: var(--ink-light); }
+
+  .code-block {
+    background: var(--green-dark); border-radius: 12px; padding: 24px 28px;
+    font-family: 'DM Mono', monospace; font-size: 13px; color: var(--green-soft);
+    line-height: 1.8; overflow-x: auto;
+  }
+  .code-block .cm { color: rgba(200,234,216,0.4); }
+  .code-block .ck { color: #7dd3b0; }
+  .code-block .cs { color: #f0c090; }
+  .code-block .cn { color: #9fd4f8; }
+
+  /* ── RESULTS ── */
+  .results-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--cream-dark); border-radius: 16px; overflow: hidden; margin-bottom: 48px; }
+  .result-cell { background: var(--white); padding: 32px 24px; text-align: center; }
+  .result-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px; font-weight: 600; color: var(--green-dark);
+    line-height: 1; margin-bottom: 8px;
+  }
+  .result-label { font-size: 13px; color: var(--ink-mid); line-height: 1.5; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--green-dark); padding: 60px 72px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-left { }
+  .footer-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; color: var(--green-soft); margin-bottom: 8px;
+  }
+  .footer-sub { font-size: 14px; color: rgba(200,234,216,0.6); }
+  .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
+  .footer-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    text-decoration: none; cursor: pointer; border: none; transition: all .2s;
+  }
+  .footer-btn.primary { background: var(--green-main); color: var(--white); }
+  .footer-btn.primary:hover { background: #2d9c6acc; }
+  .footer-btn.outline { background: transparent; color: var(--green-soft); border: 1px solid rgba(200,234,216,0.3); }
+  .footer-btn.outline:hover { background: rgba(200,234,216,0.08); }
+
+  /* ── SCROLL ANIMATIONS ── */
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { min-height: 300px; }
+    .hero-left { padding: 48px 24px; }
+    section { padding: 64px 24px; }
+    .profile-grid { grid-template-columns: 1fr 1fr; }
+    .diag-grid { grid-template-columns: 1fr; }
+    .tech-grid { grid-template-columns: 1fr 1fr; }
+    .results-grid { grid-template-columns: 1fr 1fr; }
+    footer { flex-direction: column; gap: 32px; align-items: flex-start; padding: 48px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">Nova Bloom</a>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#diagnostic">Diagnostic</a></li>
+    <li><a href="#solution">Solution</a></li>
+    <li><a href="#results">Results</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">Automation case study</div>
+    <h1 class="hero-title">From zero<br>to <em>four emails</em><br>per customer</h1>
+    <p class="hero-subtitle">How Nova Bloom went from no post-purchase communication to a fully automated 14-day email journey — built from scratch in a single session.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Industry</span>
+        <span class="hero-meta-value">E-commerce · Plants</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Company size</span>
+        <span class="hero-meta-value">32 people</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Monthly orders</span>
+        <span class="hero-meta-value">~1,400</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Deliverable</span>
+        <span class="hero-meta-value">Working Node.js app</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-pattern"></div>
+    <div class="hero-visual">
+      <div class="flow-card">
+        <div class="flow-dot">📦</div>
+        <div class="flow-card-body">
+          <div class="flow-card-title">Order fulfilled on Shopify</div>
+          <div class="flow-card-sub">Webhook triggers the sequence</div>
+        </div>
+      </div>
+      <div class="flow-connector"></div>
+      <div class="flow-card">
+        <div class="flow-dot">✉️</div>
+        <div class="flow-card-body">
+          <div class="flow-card-title">Delivery confirmation</div>
+          <div class="flow-card-sub">Sent immediately</div>
+        </div>
+        <span class="flow-badge">Day 0</span>
+      </div>
+      <div class="flow-connector"></div>
+      <div class="flow-card">
+        <div class="flow-dot">🌿</div>
+        <div class="flow-card-body">
+          <div class="flow-card-title">Plant care guide</div>
+          <div class="flow-card-sub">Tailored to their purchase</div>
+        </div>
+        <span class="flow-badge">Day 3</span>
+      </div>
+      <div class="flow-connector"></div>
+      <div class="flow-card">
+        <div class="flow-dot">⭐</div>
+        <div class="flow-card-body">
+          <div class="flow-card-title">Review request</div>
+          <div class="flow-card-sub">Social proof, links to product</div>
+        </div>
+        <span class="flow-badge">Day 7</span>
+      </div>
+      <div class="flow-connector"></div>
+      <div class="flow-card">
+        <div class="flow-dot">🏷️</div>
+        <div class="flow-card-body">
+          <div class="flow-card-title">Upsell + discount</div>
+          <div class="flow-card-sub">Curated companion plants</div>
+        </div>
+        <span class="flow-badge">Day 14</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="section-tag">01 — The problem</div>
+  <h2 class="section-title reveal">A growing company with no customer retention loop</h2>
+  <p class="section-lead reveal">Nova Bloom was fulfilling 1,400 orders a month with a 32-person team. Every order was going out the door — and then nothing. No follow-up, no care guidance, no review asks, no repeat purchase nudge.</p>
+
+  <div class="profile-grid reveal">
+    <div class="profile-cell">
+      <div class="profile-cell-label">Annual revenue</div>
+      <div class="profile-cell-value">€2.1M</div>
+      <div class="profile-cell-sub">Direct-to-consumer</div>
+    </div>
+    <div class="profile-cell">
+      <div class="profile-cell-label">Support tickets / week</div>
+      <div class="profile-cell-value">120</div>
+      <div class="profile-cell-sub">All handled manually in Gmail</div>
+    </div>
+    <div class="profile-cell">
+      <div class="profile-cell-label">Post-purchase emails</div>
+      <div class="profile-cell-value">0</div>
+      <div class="profile-cell-sub">Literally zero. Nothing sent after delivery.</div>
+    </div>
+    <div class="profile-cell">
+      <div class="profile-cell-label">Avg order value</div>
+      <div class="profile-cell-value">€62</div>
+      <div class="profile-cell-sub">380 active SKUs</div>
+    </div>
+    <div class="profile-cell">
+      <div class="profile-cell-label">CRM</div>
+      <div class="profile-cell-value">None</div>
+      <div class="profile-cell-sub">Customer data in 3 silos</div>
+    </div>
+    <div class="profile-cell">
+      <div class="profile-cell-label">Inventory tracking</div>
+      <div class="profile-cell-value">Sheets</div>
+      <div class="profile-cell-sub">Updated manually 2× per day</div>
+    </div>
+  </div>
+
+  <div class="pain-list reveal">
+    <div class="pain-item">
+      <div class="pain-icon">⚠️</div>
+      <div>
+        <div class="pain-title">Support team overwhelmed with "where is my order?" emails</div>
+        <div class="pain-desc">120 tickets per week, no triage, no templates, no escalation rules. All handled reactively.</div>
+      </div>
+    </div>
+    <div class="pain-item">
+      <div class="pain-icon">⚠️</div>
+      <div>
+        <div class="pain-title">Zero post-purchase communication meant zero retention leverage</div>
+        <div class="pain-desc">Customers bought, received their plant, and never heard from Nova Bloom again. No upsell, no care tips, no reviews.</div>
+      </div>
+    </div>
+    <div class="pain-item">
+      <div class="pain-icon">⚠️</div>
+      <div>
+        <div class="pain-title">Marketing campaigns planned over WhatsApp</div>
+        <div class="pain-desc">No campaign calendar, briefs shared as voice messages, deadlines regularly missed.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIAGNOSTIC -->
+<section id="diagnostic">
+  <div class="section-tag">02 — The diagnostic</div>
+  <h2 class="section-title reveal">Five opportunities, ranked by impact and effort</h2>
+  <p class="section-lead reveal">Before writing a single line of code, a structured diagnostic mapped every manual process to an automation opportunity. The goal: find the highest-impact, lowest-effort wins first.</p>
+
+  <div class="diag-grid reveal">
+    <div class="diag-card highlight">
+      <div class="diag-num">01</div>
+      <div class="diag-title">Post-purchase email flow</div>
+      <div class="diag-desc">4-email automated sequence triggered on Shopify fulfillment. Delivery confirmation, care tips, review request, upsell offer.</div>
+      <div class="diag-bars">
+        <div class="diag-bar-row">
+          <span class="diag-bar-label">Impact</span>
+          <div class="diag-bar-track"><div class="diag-bar-fill" style="width:90%"></div></div>
+        </div>
+        <div class="diag-bar-row">
+          <span class="diag-bar-label">Effort</span>
+          <div class="diag-bar-track"><div class="diag-bar-fill" style="width:20%; background: var(--green-soft);"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="diag-card">
+      <div class="diag-num">02</div>
+      <div class="diag-title">AI support triage bot</div>
+      <div class="diag-desc">Claude API classifies incoming support emails and auto-replies to common cases (order status, returns), escalating edge cases to a human.</div>
+      <div class="diag-bars">
+        <div class="diag-bar-row">
+          <span class="diag-bar-label">Impact</span>
+          <div class="diag-bar-track"><div class="diag-bar-fill" style="width:85%"></div></div>
+        </div>
+        <div class="diag-bar-row">
+          <span class="diag-bar-label">Effort</span>
+          <div class="diag-bar-track"><div class="diag-bar-fill" style="width:30%; background: var(--green-soft);"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="diag-card">
+      <div class="diag-num">03</div>
+      <div class="diag-title">Inventory alert system</div>
+      <div class="diag-desc">Replaces the manual Sheets check. Shopify API monitoring with configurable thresholds and automatic reorder suggestions.</div>
+      <div class="diag-bars">
+        <div class="diag-bar-row">
+          <span class="diag-bar-label">Impact</span>
+          <div class="diag-bar-track"><div class="diag-bar-fill" style="width:65%"></div></div>
+        </div>
+        <div class="diag-bar-row">
+          <span class="diag-bar-label">Effort</span>
+          <div class="diag-bar-track"><div class="diag-bar-fill" style="width:20%; background: var(--green-soft);"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="diag-card">
+      <div class="diag-num">04</div>
+      <div class="diag-title">Customer 360° dashboard</div>
+      <div class="diag-desc">Merges Shopify orders, Gmail support threads, and Mailchimp engagement into a unified per-customer view.</div>
+      <div class="diag-bars">
+        <div class="diag-bar-row">
+          <span class="diag-bar-label">Impact</span>
+          <div class="diag-bar-track"><div class="diag-bar-fill" style="width:80%"></div></div>
+        </div>
+        <div class="diag-bar-row">
+          <span class="diag-bar-label">Effort</span>
+          <div class="diag-bar-track"><div class="diag-bar-fill" style="width:55%; background: var(--green-soft);"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="section-tag">03 — The solution</div>
+  <h2 class="section-title reveal">A 4-email sequence, automated end to end</h2>
+  <p class="section-lead reveal">Starting with the highest-impact opportunity: a post-purchase email flow built on Shopify webhooks and Mailchimp Transactional. Every customer gets the same thoughtful sequence — automatically.</p>
+
+  <div class="email-tabs reveal">
+    <button class="etab active" onclick="showEmail(0)">📦 Delivery confirmation</button>
+    <button class="etab" onclick="showEmail(1)">🌿 Care guide</button>
+    <button class="etab" onclick="showEmail(2)">⭐ Review request</button>
+    <button class="etab" onclick="showEmail(3)">🏷️ Upsell offer</button>
+  </div>
+
+  <div class="email-preview-wrap reveal">
+    <div class="ep-chrome">
+      <div class="ep-dot" style="background:#ff6058"></div>
+      <div class="ep-dot" style="background:#ffbb2c"></div>
+      <div class="ep-dot" style="background:#28c840"></div>
+    </div>
+
+    <!-- Email 1 -->
+    <div id="ep0">
+      <div class="ep-meta">
+        <span><b>From:</b> Nova Bloom &lt;hello@novabloom.pt&gt;</span>
+        <span><b>Subject:</b> Your plants are on their way, Ana! 📦</span>
+      </div>
+      <div class="email-body-preview">
+        <div class="ep-header"><div class="ep-logo">Nova Bloom</div><div class="ep-tagline">Plants for every home</div></div>
+        <div class="ep-content">
+          <div class="ep-daybadge">Day 0 — sent on fulfillment</div>
+          <h2 class="ep-h1">Your order is confirmed and on its way!</h2>
+          <p class="ep-p">Hi Ana, we've packed your order <strong>#1042</strong> with care and it's now with our courier.</p>
+          <p class="ep-p"><strong>Estimated delivery:</strong> Thursday, 1 June<br><strong>Tracking:</strong> PT8423719004</p>
+          <a class="ep-cta">Track my order →</a>
+          <hr class="ep-divider">
+          <p class="ep-note">In a few days we'll send you personalised care tips for your new plants. Keep an eye out!</p>
+        </div>
+        <div class="ep-footer">Nova Bloom · Rua das Flores, Porto · <a href="#" style="color:inherit">Unsubscribe</a></div>
+      </div>
+    </div>
+
+    <!-- Email 2 -->
+    <div id="ep1" style="display:none">
+      <div class="ep-meta">
+        <span><b>From:</b> Nova Bloom &lt;hello@novabloom.pt&gt;</span>
+        <span><b>Subject:</b> How to care for your new plants, Ana</span>
+      </div>
+      <div class="email-body-preview">
+        <div class="ep-header"><div class="ep-logo">Nova Bloom</div><div class="ep-tagline">Plants for every home</div></div>
+        <div class="ep-content">
+          <div class="ep-daybadge">Day 3 — 3 days after delivery</div>
+          <h2 class="ep-h1">Help your plants thrive — here's your care guide</h2>
+          <p class="ep-p">Hi Ana, your Monstera Deliciosa should be settling in. Here's everything you need:</p>
+          <div>
+            <div class="tip-row-ep">
+              <div class="tip-ico">💧</div>
+              <div class="tip-txt"><b>Watering —</b> Once a week. Let the top 2cm of soil dry between waterings.</div>
+            </div>
+            <div class="tip-row-ep">
+              <div class="tip-ico">☀️</div>
+              <div class="tip-txt"><b>Light —</b> Bright indirect light. Near a north or east-facing window is ideal.</div>
+            </div>
+            <div class="tip-row-ep">
+              <div class="tip-ico">🌡️</div>
+              <div class="tip-txt"><b>Temperature —</b> Thrives between 16–24°C. Keep away from drafts.</div>
+            </div>
+          </div>
+          <br>
+          <a class="ep-cta">View full care library →</a>
+        </div>
+        <div class="ep-footer">Nova Bloom · Rua das Flores, Porto · <a href="#" style="color:inherit">Unsubscribe</a></div>
+      </div>
+    </div>
+
+    <!-- Email 3 -->
+    <div id="ep2" style="display:none">
+      <div class="ep-meta">
+        <span><b>From:</b> Nova Bloom &lt;hello@novabloom.pt&gt;</span>
+        <span><b>Subject:</b> How are your plants doing? We'd love your feedback</span>
+      </div>
+      <div class="email-body-preview">
+        <div class="ep-header"><div class="ep-logo">Nova Bloom</div><div class="ep-tagline">Plants for every home</div></div>
+        <div class="ep-content">
+          <div class="ep-daybadge">Day 7 — 7 days after delivery</div>
+          <h2 class="ep-h1">Your plants have been home a week — how are they?</h2>
+          <p class="ep-p">Hi Ana, we hope your new plants are already brightening up your space. Your review helps other plant lovers find the right plants.</p>
+          <div class="review-box">
+            <p style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:6px;">How would you rate your order?</p>
+            <div style="font-size:26px;letter-spacing:4px;margin-bottom:12px;">⭐⭐⭐⭐⭐</div>
+            <a class="ep-cta" style="margin:0">Leave a review →</a>
+          </div>
+          <hr class="ep-divider">
+          <p class="ep-note">Not happy with something? Reply to this email and we'll make it right — no questions asked.</p>
+        </div>
+        <div class="ep-footer">Nova Bloom · Rua das Flores, Porto · <a href="#" style="color:inherit">Unsubscribe</a></div>
+      </div>
+    </div>
+
+    <!-- Email 4 -->
+    <div id="ep3" style="display:none">
+      <div class="ep-meta">
+        <span><b>From:</b> Nova Bloom &lt;hello@novabloom.pt&gt;</span>
+        <span><b>Subject:</b> Plants that pair perfectly with your Monstera Deliciosa</span>
+      </div>
+      <div class="email-body-preview">
+        <div class="ep-header"><div class="ep-logo">Nova Bloom</div><div class="ep-tagline">Plants for every home</div></div>
+        <div class="ep-content">
+          <div class="ep-daybadge">Day 14 — 14 days after delivery</div>
+          <h2 class="ep-h1">Complete your collection, Ana</h2>
+          <p class="ep-p">Your Monstera should be thriving — why not give it some company?</p>
+          <div class="product-grid-ep">
+            <div class="product-card-ep">
+              <div class="product-plant">🌿</div>
+              <div class="product-name-ep">Pilea Peperomioides</div>
+              <div class="product-price-ep">€12.90</div>
+            </div>
+            <div class="product-card-ep">
+              <div class="product-plant">🪴</div>
+              <div class="product-name-ep">Pothos Golden</div>
+              <div class="product-price-ep">€9.50</div>
+            </div>
+          </div>
+          <a class="ep-cta">Shop the collection →</a>
+          <hr class="ep-divider">
+          <div style="background:var(--green-pale);border-radius:8px;padding:14px;text-align:center;">
+            <strong style="color:var(--green-mid);">Use code BLOOM15</strong>
+            <p style="font-size:12px;color:var(--ink-light);margin:4px 0 0">15% off your next order · Valid 7 days</p>
+          </div>
+        </div>
+        <div class="ep-footer">Nova Bloom · Rua das Flores, Porto · <a href="#" style="color:inherit">Unsubscribe</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tech breakdown -->
+  <div style="margin-top:56px">
+    <h3 style="font-family:'Playfair Display',serif;font-size:24px;color:var(--green-dark);margin-bottom:24px;" class="reveal">How it's built</h3>
+    <div class="tech-grid reveal">
+      <div class="tech-card">
+        <div class="tech-card-label">Trigger</div>
+        <div class="tech-card-value">Shopify webhook</div>
+        <div class="tech-card-note">Fires on order fulfillment, HMAC-verified</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-card-label">Scheduler</div>
+        <div class="tech-card-value">Node.js + cron</div>
+        <div class="tech-card-note">JSON queue, retries up to 3×, 5-min polling</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-card-label">Email delivery</div>
+        <div class="tech-card-value">Mandrill API</div>
+        <div class="tech-card-note">Mailchimp Transactional, open + click tracking</div>
+      </div>
+    </div>
+
+    <div class="code-block reveal">
+<span class="cm">// When an order ships, schedule all 4 emails</span>
+<span class="ck">app</span>.<span class="cn">post</span>(<span class="cs">'/webhooks/order-fulfilled'</span>, <span class="ck">async</span> (req, res) => {
+  <span class="ck">const</span> order = req.body;
+  <span class="ck">const</span> now = Date.now();
+
+  <span class="ck">await</span> scheduleEmail({ type: <span class="cs">'delivery_confirmation'</span>, sendAt: now            });
+  <span class="ck">await</span> scheduleEmail({ type: <span class="cs">'care_guide'</span>,            sendAt: now + days(<span class="cn">3</span>)  });
+  <span class="ck">await</span> scheduleEmail({ type: <span class="cs">'review_request'</span>,       sendAt: now + days(<span class="cn">7</span>)  });
+  <span class="ck">await</span> scheduleEmail({ type: <span class="cs">'upsell_offer'</span>,         sendAt: now + days(<span class="cn">14</span>) });
+});</div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="section-tag">04 — Projected results</div>
+  <h2 class="section-title reveal">What this sequence is expected to deliver</h2>
+  <p class="section-lead reveal">Based on industry benchmarks for D2C e-commerce post-purchase flows at Nova Bloom's order volume of ~1,400/month.</p>
+
+  <div class="results-grid reveal">
+    <div class="result-cell">
+      <div class="result-num">+18%</div>
+      <div class="result-label">Repeat purchase rate from upsell email</div>
+    </div>
+    <div class="result-cell">
+      <div class="result-num">−30%</div>
+      <div class="result-label">Support tickets from proactive delivery info</div>
+    </div>
+    <div class="result-cell">
+      <div class="result-num">4×</div>
+      <div class="result-label">More reviews collected per month</div>
+    </div>
+    <div class="result-cell">
+      <div class="result-num">0 hrs</div>
+      <div class="result-label">Manual work per week once running</div>
+    </div>
+  </div>
+
+  <div style="background:var(--green-pale);border:1px solid var(--green-soft);border-radius:16px;padding:32px 36px;" class="reveal">
+    <h3 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--green-dark);margin-bottom:12px;">What comes next</h3>
+    <p style="font-size:15px;color:var(--ink-mid);line-height:1.7;margin:0">
+      This automation is #1 of 5 identified opportunities. The same diagnostic surfaced an AI support triage bot, an inventory alert system, a customer 360° dashboard, and a marketing campaign brief generator — each following the same methodology: map the process, score by impact and effort, build the highest-ROI item first.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">
+    <div class="footer-title">Nova Bloom</div>
+    <div class="footer-sub">A simulated automation project · Built as a portfolio case study</div>
+  </div>
+  <div class="footer-links">
+    <a class="footer-btn primary" href="nova-bloom-email-automation.zip" download>Download source code</a>
+    <a class="footer-btn outline" href="README.md">View README</a>
+  </div>
+</footer>
+
+<script>
+  function showEmail(i) {
+    [0,1,2,3].forEach(n => {
+      document.getElementById('ep'+n).style.display = n===i ? 'block' : 'none';
+    });
+    document.querySelectorAll('.etab').forEach((t,n) => t.classList.toggle('active', n===i));
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
